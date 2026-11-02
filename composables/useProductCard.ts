@@ -1,0 +1,20 @@
+// WooCommerce product (from /api/wc/products) -> the shape ProductCard expects
+export const toProductCard = (product: any) => ({
+    id: product.id,
+    name: product.name,
+    categories: product.categories,
+    tags: product.tags,
+    slug: product.slug,
+    thumbnail: product.images?.[0]?.thumbnail || '',
+    image: product.images?.[0],
+    type: product.type,
+    grouped_products: product.grouped_products,
+    variations: product.variations,
+    is_epay: product.is_epay,
+    is_prepay: product.is_prepay,
+    price: product.price,
+    on_sale: product.on_sale,
+    regular_price: product.regular_price,
+    stock: product.stock_status,
+    occasion: (product.categories || []).some((category: any) => category.slug == 'occasion'),
+})
