@@ -88,44 +88,6 @@ watch(() => form.phone, (value) => {
   if (digits !== value) form.phone = digits
 })
 
-// Contact details from the last order, kept in the browser so a returning
-// customer doesn't retype them
-const SAVED_CUSTOMER_KEY = 'checkout:customer'
-
-const saveCustomer = () => {
-  try {
-    localStorage.setItem(SAVED_CUSTOMER_KEY, JSON.stringify({
-      first_name: form.first_name.trim(),
-      last_name: form.last_name.trim(),
-      phone: form.phone,
-      wilaya: form.wilaya,
-      commune: form.commune,
-    }))
-  } catch {}
-}
-
-const restoreCustomer = async () => {
-  let saved: any = null
-  try {
-    saved = JSON.parse(localStorage.getItem(SAVED_CUSTOMER_KEY) || 'null')
-  } catch {}
-  if (!saved) return
-
-  form.first_name = saved.first_name || ''
-  form.last_name = saved.last_name || ''
-  form.phone = saved.phone || ''
-
-  if (!saved.wilaya || !wilayaOptions.value.some(w => w.value === saved.wilaya)) return
-  form.wilaya = saved.wilaya
-  await getCommune(saved.wilaya)
-
-  // Communes and shipping prices come from the API: only keep the commune if it still exists
-  if (saved.commune && communeOptions.value.some((c: any) => c.nom == saved.commune)) {
-    form.commune = saved.commune
-    await getCost()
-  }
-}
-
 const validateCheckout = () => {
   const result = checkoutSchema.safeParse({
     first_name: form.first_name,
@@ -266,7 +228,6 @@ const submitOrder = async () => {
       }))
     } catch {}
 
-    saveCustomer()
     clearCart()
     navigateTo('/success?orderId=' + orderId)
 
@@ -367,8 +328,6 @@ onMounted(() => {
   wilayaOptions.value = wilayas.filter(
       (w, index, self) => index === self.findIndex(x => x.value === w.value)
   )
-
-  restoreCustomer()
 })
 
 const steps = ['checkout.stepCart', 'checkout.stepDelivery', 'checkout.stepConfirm']
